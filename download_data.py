@@ -4,6 +4,7 @@ import datetime
 import time
 import shutil
 import os
+import json
 from threading import Thread
 
 
@@ -66,13 +67,17 @@ def download(state = None):
         return
     # modifies the list content to thread instance
     update_Thread = [Thread( target = download_file, args = (data['code'], data['json_name'])) for data in update_list]
-
+    update_Thread = [update_Thread[i:i+5] for i in range(0, len(update_Thread), 5)] 
     # download file with threads
-    for thread in update_Thread:
-        thread.start()
+    
+    # updates jsons in batch of 5
+    
+    for threadList in update_Thread:
+        for thread in threadList:
+            thread.start()
 
-    for thread in update_Thread:
-        thread.join()
+        for thread in threadList:
+            thread.join()
         
     # update the file "update_data.json"
 
@@ -90,11 +95,27 @@ def download(state = None):
 def timestamp():
     return int(datetime.datetime.now().timestamp())
 
+def reduce_data(data):
+    data = data.json()
+    final = {}
+    
+    disticts = data[list(data.keys())[-1]].get('districts', {})
+    for dist in disticts:
+        dist_data = []
+        for date in list(disticts[dist]['dates'].keys())[-30::]:
+            dist_data.append(disticts[dist]['dates'][date])
+        final[dist] = dist_data
+    return json.dumps(final)
+            
+    
+    
+
 def download_file(name, json_name):
 
     with sess.get(f'https://api.covid19india.org/v4/min/timeseries-{name}.min.json') as r:
+        reduced = reduce_data(r)
         with open(f'./covid_data/{json_name}', 'w') as f:
-            f.write(str(r.text))
+            f.write(reduced)
 
 store = Store()
 sess = utils.session()

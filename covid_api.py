@@ -94,18 +94,14 @@ def route_data(train_no = None):
     route_covid_data = []
     for station, state_code in zip(route_data, route_state_code):
         name, district, state = station
-        covid = utils.readfile('covid_data/'+state +'.json', True)[state_code]
-        district_data = covid['districts'].get(district, {}).get('dates', None)
+        covid = utils.readfile('covid_data/'+state +'.json', True)
+        district_data = covid.get(district, None)
         if not district_data:
             route_covid_data.append((False, name, district))
             continue
     
-        date_list = list(district_data.keys())
         # contains the data of last 30 days
-        dis_30 = [district_data[date] for date in date_list[len(date_list)-30:]]
-        print('parsing started')
-        delta, total  = parse_covid_data(dis_30)
-        print('end')
+        delta, total  = parse_covid_data(district_data)
         route_covid_data.append((True, name, district, state, delta, total))
 
     return route_covid_data
