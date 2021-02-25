@@ -1,0 +1,3 @@
+https://www.railyatri.in/stations
+https://api.covid19india.org/v4/min/timeseries-MH.min.json
+https://api.railbeeps.com/api/fetchAvailability/api-key/web-cfc8cf88fa0ac3b6fd8f9570608c6911/trainno/9317/
