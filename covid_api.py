@@ -82,7 +82,7 @@ def route_data(train_no = None):
         state = data[-1]
         state_code = state_code_dict[data[-1]]
         route_state_code.append(state_code)
-        if not storage.covid.get(state, False) or storage.update_data.get( state_code, time.time() - 86401)> 86400:
+        if (not storage.covid.get(state, False)) or time.time() - storage.update_data.get( state_code, time.time() - 86401)> 86400:
             no_data_state_code.append(state_code)
             
 
@@ -100,11 +100,12 @@ def route_data(train_no = None):
             route_covid_data.append((False, name, district))
             continue
     
-        date_list = sorted(list(district_data.keys()))
-
+        date_list = list(district_data.keys())
         # contains the data of last 30 days
         dis_30 = [district_data[date] for date in date_list[len(date_list)-30:]]
+        print('parsing started')
         delta, total  = parse_covid_data(dis_30)
+        print('end')
         route_covid_data.append((True, name, district, state, delta, total))
 
     return route_covid_data
